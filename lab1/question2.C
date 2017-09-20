@@ -24,7 +24,7 @@ int main()
    }
    printf("\nLong int version: ");
    unsigned long int *lb = ((unsigned long int*) (bytestring));
-   printf("%lX", lb[0]);
- 
-   
+   printf("%lX", lb[0]); 
+  
+   return 0;  
 }
