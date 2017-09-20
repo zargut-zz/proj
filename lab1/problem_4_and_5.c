@@ -8,11 +8,6 @@ void addTwoSignedBytes(signed char b1, signed char b2)
    signed char result = b1 + b2;
    int overflow = 0;
    
-   if(result > 0x7F)
-   {
-      printf("Above 127, therefore overflow");
-   }
-   
    if(b1 > 0 && b2 > 0 && result < 0)
    {
       printf("!!!!Overflow:\n");
@@ -22,11 +17,6 @@ void addTwoSignedBytes(signed char b1, signed char b2)
    {
       printf("!!!Overflow: \n");
       overflow = 1;
-   }
-   
-   if(b1 > 0 && (b2 > 0x7F - b1))
-   {
-      printf("Above 7F, therefore overflow");
    }
    
    printf("0x%02X + 0x%02X = 0x%02X Overflow: %d \n\n", b1, b2, result, overflow);
