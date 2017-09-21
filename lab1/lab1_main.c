@@ -124,7 +124,7 @@ int main()
    printf("\n");
 
    // PROBLEM #5:
-   printf("\nPROBLEM 5:*\n");
+   printf("\nPROBLEM 5:\n");
    addTwoSignedBytes(0x20, 0x35);
    addTwoSignedBytes(0x80, 0x7F);
    addTwoSignedBytes(0x80, 0xFF);
