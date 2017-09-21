@@ -1,5 +1,8 @@
 #include<stdio.h>
-
+/*
+ * Problem 1: Prints out data-types and their size
+ * no return value, no parameter, simple print function
+ */
 void problem1()
 {
    int i;
@@ -11,7 +14,11 @@ void problem1()
    printf("Integer Size: %lu\n", sizeof(i));
    printf("Long Integer Size: %lu\n", sizeof(num));
 }
-//PROBLEM 2
+
+/*
+ * Problem 2: Prints out bytes in different ordering based on data-type
+ * no return value, no parameters, simple print function results
+ */
 void problem2()
 {
    unsigned char bytestring[] = {0x41, 0x33, 0x54, 0x80, 0xFF, 0x99, 0x01, 0x78,0x55, 0x20, 0xFE, 0xEE, 0x00, 0x00, 0x00, 0x00};
@@ -39,7 +46,11 @@ void problem2()
    printf("0x%lX", lb[0]);
 
 }
-//PROBLEM 3
+
+/*
+ * Problem 3: Adds Unsigned Characters
+ * no return value, two parameters: unsigned char values (b1,b2) added in the function, simple print function that prints result and carry  
+ */
 void addTwoUnsignedBytes(unsigned char b1, unsigned char b2)
 {
    unsigned char result = b1 + b2;
@@ -48,7 +59,27 @@ void addTwoUnsignedBytes(unsigned char b1, unsigned char b2)
 }
 
 /*
- * Number 5
+ * Problem 4: Detects carry from unsigned character addition
+ * no return value, two parameters: signed char values (b1,b2) added, simple print function that prints results and overflow
+ */
+void addTwoUnSignedBytes(unsigned char b1, unsigned char b2)
+{
+   unsigned char result = b1 + b2;
+   int carry = 0;
+
+   // compare the sum to one of the operands; if it is less
+   // than the operand, then a carry occurred
+   if(result < b1 || result < b2)
+   {
+      //printf("CARRY occured \n");
+      carry = 1;
+   }
+
+   printf("0x%02X + 0x%02X Carry: %d \n", b1, b2, carry);
+}
+
+/*
+ * Problem 5: Detects overflow from signed character addition
  */
 void addTwoSignedBytes(signed char b1, signed char b2)
 {
@@ -68,24 +99,8 @@ void addTwoSignedBytes(signed char b1, signed char b2)
 }
 
 /*
- * Number 4
+ * Problem 6: Performs an extended field arithmetic; similar to a full adder 
  */
-void addTwoUnSignedBytes(unsigned char b1, unsigned char b2)
-{
-   unsigned char result = b1 + b2;
-   int carry = 0;
-
-   // compare the sum to one of the operands; if it is less
-   // than the operand, then a carry occurred
-   if(result < b1 || result < b2)
-   {
-      //printf("CARRY occured \n");
-      carry = 1;
-   }
-
-   printf("0x%02X + 0x%02X Carry: %d \n", b1, b2, carry);
-}
-
 unsigned int arbitrary_byte_add(unsigned char *result, unsigned char *a1, unsigned char *a2, int size, unsigned int carry_in)
 {
    *result = *a1 + *a2 + carry_in;
