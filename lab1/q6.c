@@ -12,7 +12,7 @@ unsigned int arbitrary_byte_add(unsigned char *result, unsigned char *a1, unsign
       *result = *result + 0x10;
       carryout = 1;
    }
-   printf("0x%02X",*result);
+   //printf("0x%02X",*result);
    return carryout;
 }
 
@@ -20,20 +20,31 @@ int main()
 {
     unsigned char result = 0;
     unsigned char  a1 = 0x01, a2 = 0x00;
-    
+    unsigned char array[5];
+    int i = 0;
+
     unsigned int answer = arbitrary_byte_add(&result, &a1, &a2, 3, 0);
     a1 = a2 = 0x00;
+    array[4] = result;
     unsigned int answer1 = arbitrary_byte_add(&result, &a1, &a2, sizeof(result) + 2, answer);
     a1 = 0x00;
     a2 = 0xFF;
+    array[3] = result;
     unsigned int answer2 = arbitrary_byte_add(&result, &a1, &a2, sizeof(result) + 2, answer1);
     a1 = 0x00;
     a2 = 0xFF;
+    array[2] = result;
     unsigned int answer3 = arbitrary_byte_add(&result, &a1, &a2, sizeof(result) + 2, answer2);
     a1 = 0x44;
     a2 = 0x30;
+    array[1] = result;
     unsigned int answer4 = arbitrary_byte_add(&result, &a1, &a2, sizeof(result) + 2, answer3);
+    array[0] = result;
     //printf("\n%X", result);
+    for (i = 0; i < 5; i++)
+    {
+        printf("0x%02X ", array[i]);
+    }
     printf("\nCarry: %d \n", answer4);
     
     return 0;
