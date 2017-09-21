@@ -1,5 +1,16 @@
 #include<stdio.h>
 
+void problem1()
+{
+   int i;
+   long int num;
+   short int other;
+   unsigned char ch;
+   printf("Byte Size: %lu\n" ,sizeof(ch));
+   printf("Short Int Size: %lu\n", sizeof(other));
+   printf("Integer Size: %lu\n", sizeof(i));
+   printf("Long Integer Size: %lu\n", sizeof(num));
+}
 //PROBLEM 2
 void problem2()
 {
@@ -77,12 +88,17 @@ void addTwoUnSignedBytes(unsigned char b1, unsigned char b2)
 
 int main()
 {
-   printf("\n**********PROBLEM 2**********\n");
+   //PROBLEM #1
+   printf("PROBLEM 1:\n");
+   problem1();
+
+   //PROBLEM $2
+   printf("\nPROBLEM 2:\n");
    problem2();
    printf("\n");
    
    //PROBLEM #3
-   printf("\n**********PROBLEM3**********\n");
+   printf("\nPROBLEM 3: \n");
    //0x20 + 0x35  (in dec: 32, 53)
    addTwoUnsignedBytes(0x20, 0x35);
    //0x80 + 0x7F
@@ -95,7 +111,7 @@ int main()
    printf("\n");
  
    // PROBLEM #4:
-   printf("\n**********PROBLEM 4**********\n");
+   printf("\nPROBLEM 4:\n");
    //0x20 + 0x35  (in dec: 32, 53)
    addTwoUnSignedBytes(0x20, 0x35);
    //0x80 + 0x7F
@@ -108,7 +124,7 @@ int main()
    printf("\n");
 
    // PROBLEM #5:
-   printf("\n**********PROBLEM 5**********\n");
+   printf("\nPROBLEM 5:*\n");
    addTwoSignedBytes(0x20, 0x35);
    addTwoSignedBytes(0x80, 0x7F);
    addTwoSignedBytes(0x80, 0xFF);
