@@ -108,12 +108,10 @@ unsigned int arbitrary_byte_add(unsigned char *result, unsigned char *a1, unsign
 
    // compare the sum to one of the operands; if it is less
    // than the operand, then a carry occurred
-   if(result < a1 || result < a2)
+   if(*result < *a1 || *result < *a2)
    {
-      *result = *result + 0x10;
       carryout = 1;
    }
-   printf("0x%02X ",*result);
    return carryout;
 }
 
@@ -162,6 +160,9 @@ int main()
    addTwoSignedBytes(0xFF, 0x01);   
    printf("\n");
 
+   unsigned char array[5];
+   int i = 0;
+   
    // PROBELM #6:
    printf("\nPROBLEM 6:\n");
    unsigned char result = 0;
@@ -180,7 +181,43 @@ int main()
    a2 = 0x30;
    unsigned int answer4 = arbitrary_byte_add(&result, &a1, &a2, sizeof(result) + 2, answer3);
    //printf("\n%X", result);
+   for (i = 0; i < 5; i++)
+   {
+      printf("0x%02X ", array[i]);
+   }
    printf("\nCarry: %d \n", answer4);
+   
+  //Question 6b
+   result = 0;
+   a1 = 0x01, a2 = 0x00;
+   
+   a1 = 0xFF;
+   a2 = 0x01;
+   unsigned int answerb = arbitrary_byte_add(&result, &a1, &a2, 3, 0);
+   a1 = 0xFF;
+   a2 = 0x00;
+   array[4] = result;
+   unsigned int answerb1 = arbitrary_byte_add(&result, &a1, &a2, sizeof(result) + 2, answerb);
+   a1 = 0xFF;
+   a2 = 0x00;
+   array[3] = result;
+   unsigned int answerb2 = arbitrary_byte_add(&result, &a1, &a2, sizeof(result) + 2, answerb1);
+   a1 = 0xFF;
+   a2 = 0x00;
+   array[2] = result;
+   unsigned int answerb3 = arbitrary_byte_add(&result, &a1, &a2, sizeof(result) + 2, answerb2);
+   a1 = 0xFF;
+   a2 = 0x00;
+   array[1] = result;
+   unsigned int answerb4 = arbitrary_byte_add(&result, &a1, &a2, sizeof(result) + 2, answerb3);
+   array[0] = result;
+   //printf("\n%X", result);
+
+   for (i = 0; i < 5; i++)
+   {
+      printf("0x%02X ", array[i]);
+   }
+   printf("\nCarry: %d \n", answerb4);
 
    return 0;
 }
