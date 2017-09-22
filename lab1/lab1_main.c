@@ -169,7 +169,7 @@ int main()
    //PROBLEM 6 
    printf("\nPart 6: Performing Extended Field Arithmetic\n");
    printf("=============================================================================================================================\n");
-   printf("\n6a)");
+   printf("\n6a)\n");
    unsigned char array[5];
    int i = 0;
    unsigned char result = 0;
@@ -195,7 +195,7 @@ int main()
    printf("\nCarry: %d \n", answer4);
    
   //Question 6b
-   printf("\n6b)");
+   printf("\n6b)\n");
    result = 0;
    a1 = 0x01, a2 = 0x00;
    
