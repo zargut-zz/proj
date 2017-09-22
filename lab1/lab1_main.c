@@ -43,7 +43,7 @@ void problem2()
    }
    printf("\nLong int version: \n");
    unsigned long int *lb = ((unsigned long int*) (bytestring));
-   printf("0x%lX", lb[0]);
+   printf("0x%lX\n", lb[0]);
 
 }
 
@@ -118,16 +118,20 @@ unsigned int arbitrary_byte_add(unsigned char *result, unsigned char *a1, unsign
 int main()
 {
    //PROBLEM #1
-   printf("PROBLEM 1:\n");
+   printf("Part 1: Data Types and their Sizes\n");
+   printf("=============================================================================================================================\n");
    problem1();
-
+   printf("=============================================================================================================================\n");
+   
    //PROBLEM $2
-   printf("\nPROBLEM 2:\n");
+   printf("\nPart 2: Byte Ordering\n");
+   printf("=============================================================================================================================\n");
    problem2();
-   printf("\n");
+   printf("=============================================================================================================================\n");
    
    //PROBLEM #3
-   printf("\nPROBLEM 3: \n");
+   printf("\nPart 3: Unsigned Addition of Small Fields \n");
+   printf("=============================================================================================================================\n");
    //0x20 + 0x35  (in dec: 32, 53)
    addTwoUnsignedBytes(0x20, 0x35);
    //0x80 + 0x7F
@@ -137,10 +141,11 @@ int main()
    //0xFF + 0x01
    addTwoUnsignedBytes(0xFF, 0x01);
 
-   printf("\n");
- 
+   printf("============================================================================================================================\n");
+   
    // PROBLEM #4:
-   printf("\nPROBLEM 4:\n");
+   printf("\nPart 4: Detecting a Carry condition\n");
+   printf("=============================================================================================================================\n");
    //0x20 + 0x35  (in dec: 32, 53)
    addTwoUnSignedBytes(0x20, 0x35);
    //0x80 + 0x7F
@@ -150,21 +155,23 @@ int main()
    //0xFF + 0x01
    addTwoUnSignedBytes(0xFF, 0x01);
 
-   printf("\n");
-
+   printf("=============================================================================================================================\n");
+   
    // PROBLEM #5:
-   printf("\nPROBLEM 5:\n");
+   printf("\nPart 5: Signed Addition and Overflow\n");
+   printf("=============================================================================================================================\n");
    addTwoSignedBytes(0x20, 0x35);
    addTwoSignedBytes(0x80, 0x7F);
    addTwoSignedBytes(0x80, 0xFF);
    addTwoSignedBytes(0xFF, 0x01);   
-   printf("\n");
-
+   
+   printf("=============================================================================================================================\n");
+   //PROBLEM 6 
+   printf("\nPart 6: Performing Extended Field Arithmetic\n");
+   printf("=============================================================================================================================\n");
+   printf("\n6a)");
    unsigned char array[5];
    int i = 0;
-   
-   // PROBELM #6:
-   printf("\nPROBLEM 6:\n");
    unsigned char result = 0;
    unsigned char  a1 = 0x01, a2 = 0x00;
 
@@ -180,7 +187,7 @@ int main()
    a1 = 0x44;
    a2 = 0x30;
    unsigned int answer4 = arbitrary_byte_add(&result, &a1, &a2, sizeof(result) + 2, answer3);
-   //printf("\n%X", result);
+   //prints answer in the proper order
    for (i = 0; i < 5; i++)
    {
       printf("0x%02X ", array[i]);
@@ -188,6 +195,7 @@ int main()
    printf("\nCarry: %d \n", answer4);
    
   //Question 6b
+   printf("\n6b)");
    result = 0;
    a1 = 0x01, a2 = 0x00;
    
