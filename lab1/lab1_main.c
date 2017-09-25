@@ -1,3 +1,9 @@
+/*
+ * Lab 1: Binary Data Representation and Arithmetic 
+ * Authors: Zarah Gutierrez, Rebecca Dong, Prachi Mehta
+ * CPE 315
+ * 09/22/2017
+ */
 #include<stdio.h>
 /*
  * Problem 1: Prints out data-types and their size
