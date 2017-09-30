@@ -108,7 +108,7 @@ int main()
    
    printf("\n");
    
-   printf("1e: \n);
+   printf("1e: \n");
    a = 0x8000;
    b = 0x8000;
    umultiply(a, b);
