@@ -81,33 +81,38 @@ void extract_float(INTFLOAT_PTR x, float f)
 int main()
 {
    //Question 1
+   printf("1a: \n");
    unsigned int a = 0x0001;
    unsigned int b = 0x0001;
    umultiply(a, b);
-   
    printf("\n");
    
+   printf("1b: \n");
    a = 0x0001;
    b = 0xFFFF;
    umultiply(a, b);
    
    printf("\n");
    
+   printf("1c: \n");
    a = 0x8000;
    b = 0x0001;
    umultiply(a, b);
    
    printf("\n");
    
+   printf("1d: \n");
    a = 0x4000;
    b = 0x4000;
    umultiply(a, b);
    
    printf("\n");
    
+   printf("1e: \n);
    a = 0x8000;
    b = 0x8000;
    umultiply(a, b);
+   printf("\n");
    
    //Question 2
    INTFLOAT INTFLOAT_PTR;
