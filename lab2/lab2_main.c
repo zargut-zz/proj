@@ -77,6 +77,69 @@ void extract_float(INTFLOAT_PTR x, float f)
    printf ("Exponent is: %d\n", x -> exponent);
    printf("\n"); 
 }
+/*
+ * PART 3: Packs the value back to IEEE 754 format. Parameter: INFLOAT_PTR
+ */
+
+int pack_value(INTFLOAT_PTR xp)
+{
+   int result;
+   unsigned int bits;
+   unsigned int  s;
+   int count = 0;
+   s = xp -> fraction;
+   //assigns the signed bit
+   s= s>>31&(0x00000001);
+   //check for special condictions
+   if(xp -> fraction == 0 && xp-> exponent == 0){
+      result = 0x00000000;
+      return result;
+   }
+   //expects right shift and adds bias
+   int exponent = (xp -> exponent-1) + 127;
+   int fraction = xp->fraction;
+   bits = exponent<<23  ;
+   if(s == 1){
+      fraction = ~(xp->fraction)+1;
+      bits = bits | 1 << 31;
+   } 
+   //shifts fraction section to the last 23 bits of the float
+   fraction = ((fraction << 2)>>9) & 0x7FFFFF; 
+   bits  = bits | fraction;
+   result = bits;
+   return result;   
+}
+
+int normal(int x)
+{
+   static unsigned int mask[] = {2147483648, 1073741824};
+   if(((x & mask[0]) != 0) && (x & mask[1]) != 0)
+   {
+      return 0;
+   }else if(((x & mask[0]) == 0) && (x & mask[1]) == 0)
+   {
+      return 0;
+   }
+   return 1;
+
+}
+void normalize(INTFLOAT_PTR x)
+{
+   int normalized = 0;
+   int cur;
+   if(x -> fraction == 0){
+      normalized = 1;
+   }
+   while(normalized != 1){
+      normalized = normal(x->fraction); 
+      if(normalized == 1){
+          break;
+      }
+      x->fraction = x->fraction<<1;
+      printf("0x%X\n", x->fraction);
+      x -> exponent--;
+   }
+}
 
 int main()
 {
@@ -115,18 +178,74 @@ int main()
    printf("\n");
    
    //Question 2
-   INTFLOAT INTFLOAT_PTR;
+   INTFLOAT i; 
+   INTFLOAT_PTR pointer = &i;
    printf ("2a. \n");
-   extract_float(&INTFLOAT_PTR, 6.25000000);
+   extract_float(pointer, 6.25000000);
    printf ("2b. \n");
-   extract_float(&INTFLOAT_PTR, -128.000000);
+   extract_float(pointer, -128.000000);
    printf ("2c. \n");
-   extract_float(&INTFLOAT_PTR, 0.12500000);
+   extract_float(pointer, 0.12500000);
    printf ("2d. \n");
-   extract_float(&INTFLOAT_PTR, 0.33333334);
+   extract_float(pointer, 0.33333334);
    
-   //Question 3
+   //Question 3: Packing Values
+   INTFLOAT x;
+   INTFLOAT_PTR xp = &x; 
+   
+   printf ("3a. \n");
+   x.exponent = 0x03;
+   x.fraction = 0x60000000;
+   printf("INTFLOAT fraction = 0x%X , exponent = %d\n",x.fraction, x.exponent);
+   printf("IEEE 754 Hex: 0x%X\n", pack_value(xp));
+   printf ("3b. \n");
+   x.exponent = 0x08;
+   x.fraction = 0xC0000000;
+   printf("INTFLOAT fraction = %X , exponent = %X\n",x.fraction, x.exponent);
+   printf("IEEE 754 Hex: 0x%X\n", pack_value(xp));
+   printf ("3c. \n");
+   x.exponent = -2;
+   x.fraction = 0x00000000;
+   printf("INTFLOAT fraction = 0x%X , exponent = %d\n",x.fraction, x.exponent);
+   printf("IEEE 754 Hex: 0x%X\n", pack_value(xp));
+   printf ("3d. \n");
+   x.exponent = -1;
+   x.fraction = 0x55555580;
+   printf("INTFLOAT fraction = 0x%X , exponent = %d\n",x.fraction, x.exponent);
+   printf("IEEE 754 Hex: 0x%X\n", pack_value(xp));
+
+   //Question 4: Normalization
+   INTFLOAT x_2;
+   INTFLOAT_PTR xp_2 = &x_2;
+
+   printf ("4a. \n");
+   x_2.exponent = 0x01;
+   x_2.fraction = 0x40000000;
+
+   normalize(xp_2);
+   printf("exponent = 0x00000001, fraction =0x40000000\nResult: exponent:0x%X fraction: 0x%X\n", x_2.exponent, x_2.fraction);
+
+   printf ("4b. \n");
+   x_2.exponent = 0x00000000;
+   x_2.fraction = 0x00200000;
+
+   normalize(xp_2);
+   printf("exponent = 0x00000000, fraction = 0x00200000 \nResult: exponent:0x%X fraction: 0x%X\n", x_2.exponent, x_2.fraction);
+
+   printf ("4c. \n");
+   x_2.exponent = 0x0000000C;
+   x_2.fraction = 0xFFC00000;
+
+   normalize(xp_2);
+   printf("exponent = 0x0000000C, fraction = 0xFFC00000\nResult: exponent:0x%X fraction: 0x%X\n", x_2.exponent, x_2.fraction);
+
+   printf ("4d. \n");
+   x_2.exponent = 0xFFFFFFF8;
+   x_2.fraction = 0x02000000;
+
+   normalize(xp_2);
+   printf("exponent = 0xFFFFFFF8, fraction = 0x02000000\nResult: exponent:0x%X fraction: 0x%X\n", x_2.exponent, x_2.fraction);
   
   
-   return 1;
+   return 0;
 }

@@ -37,7 +37,8 @@ int pack_value(INTFLOAT_PTR xp)
 int main()
 {
    INTFLOAT x;
-   INTFLOAT_PTR p = &x;
+   INTFLOAT_PTR p;
+   p = &x;
   
    x.exponent = 0x06;
    x.fraction = 0x90000000;
