@@ -14,7 +14,7 @@ float fsub(a,b)
    int diffexp;
    float retval;
 
-   
+    
 }
 
 int main()
