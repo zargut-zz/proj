@@ -43,4 +43,34 @@ void extract_float(INTFLOAT_PTR x, float f)
    printf ("Fraction is: 0x%08X\n", x -> fraction);
    printf ("Exponent is: %d\n", x -> exponent);
    printf("\n"); 
+
+float fsub(float a, float b)
+{
+   INTFLOAT ax, bx;
+   INTFLOAT result;
+   int diffexp;
+   float retval;
+   
+   extract_float(&ax, a);
+   extract_float(&bx, b);
+   
+   diffexp = ax.exponent - bx.exponent;
+   if (diffexp > 0)
+   {
+      bx.fraction >>= diffexp;
+      bx.exponent += diffexp;
+   )
+   if (diffexp < 0)
+   {
+      ax.fraction >>= diffexp;
+      ax.exponent += diffexp;
+   }
+   
+   result.fraction = (ax.fraction << 1) - (bx.fraction << 1);
+   result .exponent = ax.exponent - 1;
+   
+   normalize(&result);
+
+   {
+       
 }
