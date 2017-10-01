@@ -54,8 +54,8 @@ void extract_float(INTFLOAT_PTR x, float f)
    {
       floatbits = * (unsigned int *) &f;
       //printf ("Floatbits: 0x%8X\n", floatbits);
-      //x -> sign = (floatbits & 0x80000000);
-      x->sign = (floatbits >> 31);
+      x -> sign = (floatbits & 0x80000000);
+      //x->sign = (floatbits >> 31);
       //printf ("Sign: 0x%08X\n", x->sign);
       
       x -> exponent = (floatbits >> 23)& 0x000000FF;
