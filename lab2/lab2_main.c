@@ -53,7 +53,7 @@ void extract_float(INTFLOAT_PTR x, float f)
    else
    {
       floatbits = * (unsigned int *) &f;
-      //printf ("Floatbits: 0x%8X\n", floatbits);
+      printf ("Floatbits: 0x%8X\n", floatbits);
       x -> sign = (floatbits & 0x80000000);
       //x->sign = (floatbits >> 31);
       //printf ("Sign: 0x%08X\n", x->sign);
@@ -139,6 +139,31 @@ void normalize(INTFLOAT_PTR x)
       printf("0x%X\n", x->fraction);
       x -> exponent--;
    }
+}
+
+int fmul(float a, float b)
+{
+   INTFLOAT x;
+   INTFLOAT_PTR xp = &x;
+   INTFLOAT y;
+   INTFLOAT_PTR yp = &y;
+   
+   INTFLOAT result;
+   INTFLOAT_PTR result_ptr = &result;
+   extract_float(xp, a);
+   extract_float(yp, b);
+   
+   printf("fraction 1: %X fractiokn 2: %X\n", ((x.fraction>>7)&0x7fffff), ((y.fraction>>7)&0x7fffff));
+    
+   result.fraction = (((((x.fraction>>7)&0x7fffff))+1)*(((y.fraction>>7)&0x7fffff)+1));
+   printf("result: %X\n", result.fraction);
+   printf("exp 1: %X exp 2: %X\n", x.exponent, y.exponent); 
+   result.exponent = x.exponent+y.exponent;
+   printf("result exp: %X\n", result.exponent);
+   
+   normalize(result_ptr);
+   return pack_value(result_ptr);
+      
 }
 
 int main()
@@ -246,6 +271,9 @@ int main()
    normalize(xp_2);
    printf("exponent = 0xFFFFFFF8, fraction = 0x02000000\nResult: exponent:0x%X fraction: 0x%X\n", x_2.exponent, x_2.fraction);
   
-  
+   //Question 7
+   float a_7 = 2.5;
+
+   printf("7a) 0x40200000 and 0x40200000 (2.5 x 2.5)\n Result: %X", fmul(a_7,a_7)); 
    return 0;
 }
