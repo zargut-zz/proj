@@ -164,7 +164,7 @@ void normalize(INTFLOAT_PTR x)
 /* 
  * PART 6: IEEE 754 formatted floats subtraction
  */
-float fsub(float a, float b)
+int fsub(float a, float b)
 {
    INTFLOAT ax, bx;
    INTFLOAT result;
@@ -177,10 +177,8 @@ float fsub(float a, float b)
    diffexp = (ax.exponent - bx.exponent);
    if (diffexp > 0)
    {
-      printf ("here");
       bx.fraction >>= diffexp;
       bx.exponent += diffexp;
-      printf ("Exponent: %d", bx.exponent);
    } 
 
    if (diffexp < 0)
