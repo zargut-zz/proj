@@ -39,11 +39,14 @@ unsigned int umultiply(unsigned int a, unsigned int b)
    //printf("0x%02X + 0x%02X = 0x%02X \n", b1, b2, result);
 }
 
+/*
+ * PART 2: Unpack float value from the IEEE 754 format 
+ */
 void extract_float(INTFLOAT_PTR x, float f)
 {
    unsigned floatbits;
    //float value;
-
+   // If float is 0
    if (f == 0)
    {
       x -> sign = 0;
@@ -52,18 +55,22 @@ void extract_float(INTFLOAT_PTR x, float f)
    }
    else
    {
+      //Casts the float as an unsigned int so can be worked on bit by bit
       floatbits = * (unsigned int *) &f;
-      printf ("Floatbits: 0x%8X\n", floatbits);
+      //printf ("Test case: 0x%8X\n", floatbits);
+      //Gets sign of the float
       x -> sign = (floatbits & 0x80000000);
       //x->sign = (floatbits >> 31);
       //printf ("Sign: 0x%08X\n", x->sign);
-      
+      //Gets exponent value of the float
       x -> exponent = (floatbits >> 23)& 0x000000FF;
       //printf ("exp1: 0x%08X\n", x->exponent);
       x -> exponent -= 0x0000007F;
-
+      //Gets fraction value of the float
       x -> fraction = (floatbits & 0x007FFFFF);      
-      
+      x -> fraction = (x->fraction<<9);
+      x -> fraction = (x->fraction | 0x40000000);
+      //If sign is 1, fraction value is written in 2's complement
       if (x->sign == 0x80000000)
       {
          x -> fraction = (~(x -> fraction)) + 1;
