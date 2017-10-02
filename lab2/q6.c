@@ -30,7 +30,8 @@ void extract_float(INTFLOAT_PTR x, float f)
       x -> exponent -= 0x0000007F;
 
       x -> fraction = (floatbits & 0x007FFFFF);      
-      
+      x -> fraction = (x->fraction<<9);
+      x -> fraction = (x->fraction | 0x40000000);
       if (x->sign == 0x80000000)
       {
          x -> fraction = (~(x -> fraction)) + 1;
@@ -58,27 +59,24 @@ int normal(int x)
    return 1;
 
 }
-
 void normalize(INTFLOAT_PTR x)
 {
    int normalized = 0;
    int cur;
-   int count = 0;
    if(x -> fraction == 0){
       normalized = 1;
    }
    while(normalized != 1){
-      count+= 1;
-      printf("Count: %d\n",count);
-      printf("current bit: %X\n, fraction: %X\n, exponent: %X\n", cur,x->fraction,x->exponent); 
+      printf("0x%08X\n", x->fraction);
+      printf("0x%d\n", x->exponent);
       normalized = normal(x->fraction); 
       if(normalized == 1){
           break;
       }
-      x->fraction = x->fraction<<2;
+      x->fraction = x->fraction<<1;
       x -> exponent--;
    }
-}  
+}
 
 int pack_value(INTFLOAT_PTR xp)
 {
@@ -112,7 +110,7 @@ float fsub(float a, float b)
    INTFLOAT ax, bx;
    INTFLOAT result;
    int diffexp;
-   float retval;
+   int retval;
    
    extract_float(&ax, a);
    extract_float(&bx, b);
@@ -120,39 +118,48 @@ float fsub(float a, float b)
    diffexp = (ax.exponent - bx.exponent);
    if (diffexp > 0)
    {
+      printf ("here");
       bx.fraction >>= diffexp;
       bx.exponent += diffexp;
-   )
+      printf ("Exponent: %d", bx.exponent);
+   } 
 
    if (diffexp < 0)
    {
+      printf ("b < a");
       ax.fraction >>= diffexp;
       ax.exponent += diffexp;
    }
-   
+    
    result.fraction = (ax.fraction << 1) - (bx.fraction << 1);
+
+   printf ("rfraction: 0x%08X\n", result.fraction);
    result.exponent = ax.exponent - 1;
-   
+   printf ("aexponent: %d\n", ax.exponent);
+   printf ("rexponent: %d\n", result.exponent);
    normalize(&result);
    
+   printf("test: 0x%08X\n", result.fraction);   
+ 
    retval = pack_value(&result);
 
-   printf("Diff: 0x%08X\n");
+   printf ("answer: %d\n", retval);
+
+   //printf("Diff: 0x%08X\n");
+   return retval;
        
 }
 
 int main()
 {
-   printf("6a: 0x40400000 and 0x3F800000 (3 - 1)\n");
-   printf("Diff: 0x%08X\n", fsub(0x40400000, 0x3F800000));
+   printf("\n6a: 0x40400000 and 0x3F800000 (3 - 1)\n");
+   printf("Diff: 0x%08X\n", fsub(3, 1));
 
-   printf("6b: 0x40400000 and 0xBF800000 (3 - (-1))\n");
-   printf("Diff: 0x%08X\n", fsub(0x40400000, 0xBF800000));
+   printf("\n6b: 0x40400000 and 0xBF800000 (3 - (-1))\n");
+   printf("Diff: 0x%08X\n", fsub(3, -1));
 
-   printf("6c: 0x40000000 and 0x40000000\n");
-   printf("Diff: 0x%08X\n", fsub(0x40000000, 0x40000000));
-   
+   printf("\n6c: 0x40000000 and 0x40000000\n");
+   printf("Diff: 0x%08X\n", fsub(2, 2));
+
    return 1;
 }
-
-
