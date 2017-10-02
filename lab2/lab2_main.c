@@ -53,7 +53,7 @@ void extract_float(INTFLOAT_PTR x, float f)
    else
    {
       floatbits = * (unsigned int *) &f;
-      printf ("Floatbits: 0x%8X\n", floatbits);
+      //printf ("Floatbits: 0x%8X\n", floatbits);
       x -> sign = (floatbits & 0x80000000);
       //x->sign = (floatbits >> 31);
       //printf ("Sign: 0x%08X\n", x->sign);
@@ -62,12 +62,13 @@ void extract_float(INTFLOAT_PTR x, float f)
       //printf ("exp1: 0x%08X\n", x->exponent);
       x -> exponent -= 0x0000007F;
 
-      x -> fraction = (floatbits & 0x007FFFFF);      
+      x->exponent+=1;
+
+      x -> fraction = ((floatbits & 0x007FFFFF)<< 7 | 1<<30);      
       
       if (x->sign == 0x80000000)
       {
          x -> fraction = (~(x -> fraction)) + 1;
-         printf("NEGATIVE, ");
       }
       
    }
@@ -136,7 +137,6 @@ void normalize(INTFLOAT_PTR x)
           break;
       }
       x->fraction = x->fraction<<1;
-      printf("0x%X\n", x->fraction);
       x -> exponent--;
    }
 }
@@ -152,18 +152,33 @@ int fmul(float a, float b)
    INTFLOAT_PTR result_ptr = &result;
    extract_float(xp, a);
    extract_float(yp, b);
-   
-   printf("fraction 1: %X fractiokn 2: %X\n", ((x.fraction>>7)&0x7fffff), ((y.fraction>>7)&0x7fffff));
+
+   int negative = 0;
+
+   int a_sign = (x.fraction & 0x80000000);
+   int b_sign = (y.fraction & 0x80000000);
+
+   if(a_sign == 0x80000000 ){
+      x.fraction = ~(x.fraction)+1;
+      negative = 1;
+      result.fraction = (~result.fraction)+1;
+   }
+   if(b_sign == 0x80000000){
+      if(negative == 1){
+         negative = 0;
+      }else{
+         negative =1;
+      }
+      y.fraction = ~(y.fraction)+1;
+   }
     
-   result.fraction = (((((x.fraction>>7)&0x7fffff))+1)*(((y.fraction>>7)&0x7fffff)+1));
-   printf("result: %X\n", result.fraction);
-   printf("exp 1: %X exp 2: %X\n", x.exponent, y.exponent); 
-   result.exponent = x.exponent+y.exponent;
-   printf("result exp: %X\n", result.exponent);
-   
+   result.fraction = ((((x.fraction>>7)&0xfffff))*((y.fraction>>7)&0xfffff));
+   if(negative == 1){
+      result.fraction = ~(result.fraction)+1;
+   }
+   result.exponent = x.exponent+y.exponent;   
    normalize(result_ptr);
-   return pack_value(result_ptr);
-      
+   return pack_value(result_ptr);   
 }
 
 int main()
@@ -274,6 +289,7 @@ int main()
    //Question 7
    float a_7 = 2.5;
 
-   printf("7a) 0x40200000 and 0x40200000 (2.5 x 2.5)\n Result: %X", fmul(a_7,a_7)); 
+   printf("7a) 0x40200000 and 0x40200000 (2.5 x 2.5)\n Result: %X\n", fmul(a_7,a_7)); 
+   printf("7b)  0xc1700000 and 0x45800000 (-15 x 4096) \n Result: %X\n", fmul(-15,4096));
    return 0;
 }
