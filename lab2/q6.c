@@ -133,17 +133,17 @@ float fsub(float a, float b)
     
    result.fraction = (ax.fraction << 1) - (bx.fraction << 1);
 
-   printf ("rfraction: 0x%08X\n", result.fraction);
+   //printf ("rfraction: 0x%08X\n", result.fraction);
    result.exponent = ax.exponent - 1;
-   printf ("aexponent: %d\n", ax.exponent);
-   printf ("rexponent: %d\n", result.exponent);
+   //printf ("aexponent: %d\n", ax.exponent);
+   //printf ("rexponent: %d\n", result.exponent);
    normalize(&result);
    
-   printf("test: 0x%08X\n", result.fraction);   
+   //printf("test: 0x%08X\n", result.fraction);   
  
    retval = pack_value(&result);
 
-   printf ("answer: %d\n", retval);
+   //printf ("answer: %d\n", retval);
 
    //printf("Diff: 0x%08X\n");
    return retval;

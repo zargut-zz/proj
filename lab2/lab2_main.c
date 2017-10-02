@@ -39,11 +39,14 @@ unsigned int umultiply(unsigned int a, unsigned int b)
    //printf("0x%02X + 0x%02X = 0x%02X \n", b1, b2, result);
 }
 
+/*
+ * PART 2: Unpack float value from the IEEE 754 format 
+ */
 void extract_float(INTFLOAT_PTR x, float f)
 {
    unsigned floatbits;
    //float value;
-
+   // If float is 0
    if (f == 0)
    {
       x -> sign = 0;
@@ -52,20 +55,27 @@ void extract_float(INTFLOAT_PTR x, float f)
    }
    else
    {
+      //Casts the float as an unsigned int so can be worked on bit by bit
       floatbits = * (unsigned int *) &f;
-      //printf ("Floatbits: 0x%8X\n", floatbits);
+
       x -> sign = (floatbits & 0x80000000);
       //x->sign = (floatbits >> 31);
       //printf ("Sign: 0x%08X\n", x->sign);
-      
+      //Gets exponent value of the float
       x -> exponent = (floatbits >> 23)& 0x000000FF;
       //printf ("exp1: 0x%08X\n", x->exponent);
       x -> exponent -= 0x0000007F;
+
 
       x->exponent+=1;
 
       x -> fraction = ((floatbits & 0x007FFFFF)<< 7 | 1<<30);      
       
+      //Gets fraction value of the float
+      x -> fraction = (floatbits & 0x007FFFFF);      
+      x -> fraction = (x->fraction<<9);
+      x -> fraction = (x->fraction | 0x40000000);
+      //If sign is 1, fraction value is written in 2's complement
       if (x->sign == 0x80000000)
       {
          x -> fraction = (~(x -> fraction)) + 1;
@@ -124,6 +134,11 @@ int normal(int x)
    return 1;
 
 }
+
+/*
+ * PART 4: Normalization
+ */
+
 void normalize(INTFLOAT_PTR x)
 {
    int normalized = 0;
@@ -139,6 +154,59 @@ void normalize(INTFLOAT_PTR x)
       x->fraction = x->fraction<<1;
       x -> exponent--;
    }
+}
+
+/* 
+ * PART 5: Add IEEE 754 formatted floats
+ */
+
+
+/* 
+ * PART 6: IEEE 754 formatted floats subtraction
+ */
+float fsub(float a, float b)
+{
+   INTFLOAT ax, bx;
+   INTFLOAT result;
+   int diffexp;
+   int retval;
+   
+   extract_float(&ax, a);
+   extract_float(&bx, b);
+   
+   diffexp = (ax.exponent - bx.exponent);
+   if (diffexp > 0)
+   {
+      printf ("here");
+      bx.fraction >>= diffexp;
+      bx.exponent += diffexp;
+      printf ("Exponent: %d", bx.exponent);
+   } 
+
+   if (diffexp < 0)
+   {
+      printf ("b < a");
+      ax.fraction >>= diffexp;
+      ax.exponent += diffexp;
+   }
+    
+   result.fraction = (ax.fraction << 1) - (bx.fraction << 1);
+
+   //printf ("rfraction: 0x%08X\n", result.fraction);
+   result.exponent = ax.exponent - 1;
+   //printf ("aexponent: %d\n", ax.exponent);
+   //printf ("rexponent: %d\n", result.exponent);
+   normalize(&result);
+   
+   //printf("test: 0x%08X\n", result.fraction);   
+ 
+   retval = pack_value(&result);
+
+   //printf ("answer: %d\n", retval);
+
+   //printf("Diff: 0x%08X\n");
+   return retval;
+       
 }
 
 int fmul(float a, float b)
@@ -285,7 +353,19 @@ int main()
 
    normalize(xp_2);
    printf("exponent = 0xFFFFFFF8, fraction = 0x02000000\nResult: exponent:0x%X fraction: 0x%X\n", x_2.exponent, x_2.fraction);
-  
+   
+   //Question 5
+   
+   //Question 6
+   printf("\n6a: 0x40400000 and 0x3F800000 (3 - 1)\n");
+   printf("Diff: 0x%08X\n", fsub(3, 1));
+
+   printf("\n6b: 0x40400000 and 0xBF800000 (3 - (-1))\n");
+   printf("Diff: 0x%08X\n", fsub(3, -1));
+
+   printf("\n6c: 0x40000000 and 0x40000000\n");
+   printf("Diff: 0x%08X\n", fsub(2, 2));
+   
    //Question 7
    float a_7 = 2.5;
 
