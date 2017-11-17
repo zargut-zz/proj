@@ -17,29 +17,18 @@ typedef struct _mb_hdr
    unsigned char filler2[64-16];	/* Overall header is 64 bytes */
 } MB_HDR, *MB_HDR_PTR;
 //Structs below are the input and output relationships between each stage of the pipeline; interface between stages
-typedef struct INST_RES
+typedef struct RES
 {
-   unsigned int active;
    unsigned int opcode;
    unsigned int func;
-}
-typedef struct DEC_RES
-{
-   unsigned int active;
    unsigned int rs;
-   unsigned int rt;
    unsigned int rd;
-}
-typedef struct EX_RES
-{
-   unsigned int active;
-   unsigned int result;
-}
-typedef struct MEM_RES
-{
-   unsigned int active;
-   unsigned int result;
-}
+   unsigned int rt;
+   int exresult;
+   int memresult;
+   int wbresult;
+} RES, *RES_PTR;
+
 typedef struct 
 int signExtensionForJumps(int instr);
 int signExtension2(int instr);

@@ -34,12 +34,14 @@ int count = 0;
 int haltflag = 0;
 
 
-
 int opcode, funcCode, jumpTargetAddress = 0;
 int branchEffAddress = 0;
 int rsReg, rtReg, rdReg = 0;
 int shamt = 0;
 int immAddress = 0;
+
+// Pipeline variables
+RES res;
 
 
 int main()
@@ -107,7 +109,7 @@ int main()
    sim = 1;
    //set sp to 0x7fffeffc
    regs[29] = 0x7fffeffc;
-   while(pc/4 < count || count != 0){
+   /*while(pc/4 < count || count != 0){
       printf ("Run or Step\n");
       scanf ("%s", response);
       strncpy(firstThreeChars, response, 3);
@@ -121,27 +123,76 @@ int main()
          }
 
       }else{
-         print_vals();
+         print_stats();
          storeInstruction(ins[pc/4]);
          pc+= 4;       
       }
-   }
+   }*/
    printf("\n");
-   print_vals();
+   print_stats();
    
    exit(0);
 
 }
-for(haltflag = 0; haltflag; clk++){
+
+for(haltflag = 0;haltflag; clk++){
    wb();
    mem();
    ex();
    instDec();
-   instFetch();
-
+   instFetch(pc/4);
    print_stats();
+}
+// instnum is the index of the instruction we want
+unsigned int instFetch(instnum)
+{
+   inst = ins[instnum];
+   res.opcode = (inst & 0xFC000000);
+   res.func = (inst & 0x0000003F);
+   pc += 4;
+}
+
+void instDec()
+{
+   if (res.opcode >= 0) {
+      
+   }
+   decode.active = 1;
+   storeInstruction(inst);
+   decode.rs = regs[rsReg];
+   decode.rt = regs[rtReg];
+   decode.rd = regs[rdReg];
+}
+
+void ex(unsigned int inst)
+{
+   if(inst == 0x00000000)
+   {
+      exit(); //what happens in pipeline with nop?
+   }
+   else
+   {
+      if (opcode == 0)
+      {
+         checkFuncCode(inst); // these functions do ex and mem? yes?
+      }  
+      else
+      {
+         checkOpcode(inst); // should we be splitting this up?
+      }
+   }
+}
+
+void mem();
+{
 
 }
+
+void wb(int regindex, int val);
+{
+   regs[regindex] = val;
+}
+
 
 void storeInstruction(unsigned int inst)
 {
@@ -169,7 +220,7 @@ void storeInstruction(unsigned int inst)
    {
       if (opcode == 0)
       {
-         checkFuncCode(inst);
+         checkFuncCode(inst); 
       }  
       else
       {
@@ -929,13 +980,12 @@ void syscall(){
 }
 
 //helper functions
-void print_vals(){
+
+void print_stats(){
    for(int i = 0; i < 32; i++){
       printf("Register %d: %08X \n", i, regs[i]);
    }
    printf("\nPC Count:%08X\n Number of Clock Cycles:%d\n Number of Instructions:%d\n", pc, clk,instr_cnt);
 }
 
-void print_stats(){
-   
-}
+
