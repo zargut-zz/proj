@@ -19,6 +19,7 @@ typedef struct _mb_hdr
 //Structs below are the input and output relationships between each stage of the pipeline; interface between stages
 typedef struct RES
 {
+   unsigned int inst;
    unsigned int opcode;
    unsigned int func;
    unsigned int rs;
@@ -27,13 +28,14 @@ typedef struct RES
    int exresult;
    int memresult;
    int wbresult;
+   unsigned int memindex;
+   unsigned int wbindex;
 } RES, *RES_PTR;
 
-typedef struct 
 int signExtensionForJumps(int instr);
 int signExtension2(int instr);
 int signExtension3(int instr);
-void storeInstruction(unsigned int inst);
+void storeInstruction(unsigned int inst, unsigned int ex);
 void checkOpcode();
 void checkFuncCode();
 void print_vals();
@@ -41,8 +43,8 @@ void print_stats();
 
 void instFetch();
 void instDec();
-void ex();
-void mem();
+void execute();
+void memory();
 void wb();
 
 //Intializing Register Execute Functions
@@ -114,7 +116,7 @@ void syscall();
  
                - print (5 to 0) <- funct code
  
-         if not 0, then check manually if opcode == 02 or 03 (jump codes)
+         if not 0, then check manually if results.opcode == 02 or 03 (jump codes)
                - display effective address (sign ext. + shifted left )
                - j or jal
  
