@@ -29,6 +29,7 @@ int pc = 0;
 int instr_cnt = 0;
 int invalid = 0;
 int sim = 0;
+int ex = 0;
 int count = 0;
 
 int haltflag = 0;
@@ -98,11 +99,15 @@ int main()
    for (i = 0; i < memp; i+=4)   /* i contains byte offset addresses */
    {
       printf("Instruction@%08X : 0x%08X\n", i, mem[i/4]);
-      storeInstruction(mem[i/4],0);
-      //ins[count] = mem[i/4];
+      //storeInstruction(mem[i/4],0);
+      ins[count] = mem[i/4];
       count++;
    }
    char response[80];
+   
+   /*for (i = 0; i < 50; i+=1){
+	   printf("Instruction@%08X : 0x%08X\n", i, ins[i]);
+   }*/
 
    char runString[] = "run";
    char firstThreeChars[4];
@@ -111,16 +116,16 @@ int main()
    //set sp to 0x7fffeffc
    regs[29] = 0x7fffeffc;
    /*while(pc/4 < count || count != 0){
-      printf ("Run or Step\n");
+      // printf ("Run or Step\n");
       scanf ("%s", response);
       strncpy(firstThreeChars, response, 3);
-      printf("%d",strcmp(firstThreeChars, runString));
+      // printf("%d",strcmp(firstThreeChars, runString));
       if(strcmp(firstThreeChars, runString) == 0)
       {
          while(pc/4 < count || count != 0){
             storeInstruction(ins[pc/4]);
             pc+= 4;
-            printf("PC: %08X",pc);
+            // printf("PC: %08X",pc);
          }
 
       }else{
@@ -129,15 +134,19 @@ int main()
          pc+= 4;       
       }
    }*/
-   for(haltflag = 0;haltflag == 0; clk++){
+   for(haltflag = 0;clk <=12/*haltflag == 0*/; clk++){
+	  //printf("PC: %08X",pc);
       wb();
       memory();
       execute();
       instDec();
       instFetch(pc/4);
-      print_stats();
+      //print_stats();
+	  /*if (ex == 1) {
+		  exit(0);
+	  }*/
    }
-   printf("\n");
+   // printf("\n");
    
    exit(0);
 
@@ -148,8 +157,12 @@ int main()
 void instFetch(unsigned int instnum)
 {
    results.inst = ins[instnum];
-   results.opcode = (results.inst& 0xFC000000);
+   results.opcode = (results.inst & 0xFC000000);
    results.func = (results.inst & 0x0000003F);
+   printf("Function code: 0x%08X \n", results.func);
+   printf("Opcode value: 0x%08X \n", results.opcode);
+
+
    pc += 4;
 }
 
@@ -160,21 +173,23 @@ void instDec()
    results.rt = regs[rtReg];
    results.rd = regs[rdReg];
    results.wbindex = rdReg;
+   printf("PC_DC: %08X\n",pc);
 }
 
-void execute(unsigned int inst)
+void execute()
 {
-   if(inst != 0x00000000)
+   if(results.inst != 0x00000000)
    {
       if (opcode == 0)
       {
-         checkFuncCode(inst, 1); // these functions do ex and mem? yes?
+         checkFuncCode(results.inst, 1); // these functions do ex and mem? yes?
       }  
       else
       {
-         checkOpcode(inst, 1); // should we be splitting this up?
+         checkOpcode(results.inst, 1); // should we be splitting this up?
       }
    }
+   printf("\nPC_EX: %08X\n",pc);   
 }
 
 void memory()
@@ -239,7 +254,7 @@ void wb()
 void storeInstruction(unsigned int inst, unsigned int ex)
 {
    // /* Extracting and Storing the instruction bits here: */
-   // printf("\nInstruction: %X\n", inst);
+   // // printf("\nInstruction: %X\n", inst);
 
    //During decode state; only extracting op codes, funccodes and such
    if(sim == 1 && ex == 0){
@@ -258,7 +273,7 @@ void storeInstruction(unsigned int inst, unsigned int ex)
       {
          if (sim == 1 && ex == 1) 
          {
-            printf("\n--> NOP Instruction\n");
+            // printf("\n--> NOP Instruction\n");
          }
          ins[count] = inst;
       }
@@ -273,17 +288,14 @@ void storeInstruction(unsigned int inst, unsigned int ex)
             checkOpcode(inst, ex);
          }
       }
-
-      if(sim == 1){
-         instr_cnt++;
-      }
+      instr_cnt++;
 
    }
   
    
    
 
-    printf("\n ------------------------------------------------- \n");
+    // printf("\n ------------------------------------------------- \n");
 }
 
 /*
@@ -292,16 +304,16 @@ void storeInstruction(unsigned int inst, unsigned int ex)
 void checkFuncCode(unsigned int inst, unsigned int ex)
 {
    // if(sim == 1 && ex == 1){
-   //    printf("--> R-Type instruction\n");
+   //    // printf("--> R-Type instruction\n");
    
-   //    printf("Function code: 0x%08X \n", funcCode);
+   //    // printf("Function code: 0x%08X \n", funcCode);
    
-   //    printf("Instruction name: ");
+   //    // printf("Instruction name: ");
    // }
    //place within register instruction decoding
    if(funcCode == 0x00 && (rsReg > 0 || rdReg > 0)){
       if (sim == 1 && ex == 1){
-         printf("sll");
+          printf("sll");
          sll(results.rs, results.rt, results.rd,shamt);
             
       }else{
@@ -310,7 +322,7 @@ void checkFuncCode(unsigned int inst, unsigned int ex)
       
    }else if(funcCode == 0x02){
       if (sim == 1 && ex == 1){
-         printf("srl");
+          printf("srl");
          srl(results.rs, results.rt, results.rd,shamt);   
       }else{
 
@@ -319,7 +331,7 @@ void checkFuncCode(unsigned int inst, unsigned int ex)
       
    }else if(funcCode == 0x03){
       if (sim == 1 && ex == 1){
-         printf("sra");
+          printf("sra");
          sra(results.rs, results.rt, results.rd,shamt);
             
       }else{
@@ -328,7 +340,7 @@ void checkFuncCode(unsigned int inst, unsigned int ex)
 
    }else if(funcCode == 0x04 && (rsReg > 0 || rtReg > 0 || rdReg > 0)){
       if (sim == 1 && ex == 1){
-         printf("sllv");
+          printf("sllv");
          sllv(results.rs, results.rt, results.rd);
       }else{
          ins[count] = inst;
@@ -336,21 +348,21 @@ void checkFuncCode(unsigned int inst, unsigned int ex)
       
    }else if(funcCode == 0x06){
       if (sim == 1 && ex == 1){
-         printf("srlv");
+          printf("srlv");
          srlv(results.rs, results.rt, results.rd);
       }else{
          ins[count] = inst;
       }
    }else if(funcCode == 0x07){
       if (sim == 1 && ex == 1){
-         printf("srav");
+          printf("srav");
          srav(results.rs, results.rt, results.rd);
       }else{
          ins[count] = inst;
       }
    }else if(funcCode == 0x08){
       if (sim == 1 && ex == 1){
-         printf("jr");
+          printf("jr");
          jr(jumpTargetAddress);
        
       }else{
@@ -358,33 +370,33 @@ void checkFuncCode(unsigned int inst, unsigned int ex)
       }
    }else if(funcCode == 0x09){
       if (sim == 1 && ex == 1){
-         printf("jalr");
+          printf("jalr");
          jalr(rsReg,jumpTargetAddress);
       }else{
          ins[count] = inst;
       }
    }else if(funcCode == 0x10){
-      printf("mfhi");
+       printf("mfhi");
    }else if(funcCode == 0x12){
-      printf("mflo");
+       printf("mflo");
    }else if(funcCode == 0x1A){
-      printf("div");
+       printf("div");
    }else if(funcCode == 0x01B){
-      printf("divu");
+       printf("divu");
    }else if(funcCode == 0x18){
-      printf("mult");
+       printf("mult");
    }else if(funcCode == 0x19){
-      printf("multu");
+       printf("multu");
    }else if(funcCode == 0x20){
       if (sim == 1 && ex == 1){
-         printf("add");
+          printf("add");
          add(results.rs, results.rt, results.rd);  
       }else{
          ins[count] = inst;
       }
    }else if(funcCode == 0x21){
       if (sim == 1 && ex == 1){
-         printf("addu");
+          printf("addu");
          addu(results.rs, results.rt, results.rd);
             
       }else{  
@@ -392,7 +404,7 @@ void checkFuncCode(unsigned int inst, unsigned int ex)
       }
    }else if(funcCode == 0x22){
       if (sim == 1 && ex == 1){
-         printf("sub");
+          printf("sub");
          sub(results.rs, results.rt, results.rd);            
       }else{
          ins[count] = inst;
@@ -400,21 +412,21 @@ void checkFuncCode(unsigned int inst, unsigned int ex)
       }
    }else if(funcCode == 0x23){
       if (sim == 1 && ex == 1){
-         printf("subu");
+          printf("subu");
          subu(results.rs, results.rt, results.rd);
       }else{
          ins[count] = inst;
       }    
    }else if(funcCode == 0x24){
       if (sim == 1 && ex == 1){
-         printf("and");
+          printf("and");
          AND(results.rs, results.rt, results.rd); 
       }else{
          ins[count] = inst;
       }  
    }else if(funcCode == 0x25){
       if (sim == 1 && ex == 1){
-         printf("or");       
+          printf("or");       
          OR(results.rs, results.rt, results.rd);  
       }else{
          ins[count] = inst;
@@ -422,14 +434,14 @@ void checkFuncCode(unsigned int inst, unsigned int ex)
       }
    }else if(funcCode == 0x26){
       if (sim == 1 && ex == 1){
-          printf("xor");
+           printf("xor");
          XOR(results.rs, results.rt, results.rd);
       }else{
          ins[count] = inst;
       }
    }else if(funcCode == 0x27){
       if (sim == 1 && ex == 1){
-         printf("nor");
+          printf("nor");
          NOR(results.rs, results.rt, results.rd);
       }else{
         ins[count] = inst;
@@ -437,7 +449,7 @@ void checkFuncCode(unsigned int inst, unsigned int ex)
 
    }else if(funcCode == 0x2A){
       if (sim == 1 && ex == 1){
-         printf("slt");
+          printf("slt");
          slt(results.rs, results.rt, results.rd);
       }else{
          ins[count] = inst;
@@ -445,14 +457,14 @@ void checkFuncCode(unsigned int inst, unsigned int ex)
 
    }else if(funcCode == 0x2B){
       if (sim == 1 && ex == 1){
-         printf("sltu");
+          printf("sltu");
          sltu(results.rs, results.rt, results.rd);
       }else{
          ins[count] = inst;
       }
    } else if(funcCode == 0x0C){
-      if(sim==1){
-        printf("Syscall");
+      if(sim==1 && ex == 1){
+         printf("Syscall");
         syscall();
       }else{
          ins[count] = inst;
@@ -460,7 +472,7 @@ void checkFuncCode(unsigned int inst, unsigned int ex)
    }else{
       if(sim == 1 && ex == 1){
          //acounts for the extra instruction before load instructions; happens during simulation
-         printf("\nlui\n");
+         // printf("\nlui\n");
          results.wbindex = -1;
       }else{
          //Diregards Invalid Instructions during store mode
@@ -470,21 +482,21 @@ void checkFuncCode(unsigned int inst, unsigned int ex)
       return;
    }
    
-   printf("\n");
+  /* // printf("\n");
    // print out the rs, rt, rd, shamt
-   printf("Rs reg: 0x%X\n", rsReg);
-   printf("Rs reg:(decimal) %d\n", rsReg);
+   // printf("Rs reg: 0x%X\n", rsReg);
+   // printf("Rs reg:(decimal) %d\n", rsReg);
    
-   printf("Rt reg: 0x%X\n", rtReg);
-   printf("Rt reg:(decimal) %d\n", rtReg);
+   // printf("Rt reg: 0x%X\n", rtReg);
+   // printf("Rt reg:(decimal) %d\n", rtReg);
    
-   printf("Rd reg: 0x%X\n", rdReg);
-   printf("Rd reg:(decimal) %d\n", rdReg);
+   // printf("Rd reg: 0x%X\n", rdReg);
+   // printf("Rd reg:(decimal) %d\n", rdReg);
    
-   printf("Shamt : 0x%X\n", shamt);
-   printf("Shamt:(decimal) %d\n", shamt);
+   // printf("Shamt : 0x%X\n", shamt);
+   // printf("Shamt:(decimal) %d\n", shamt);
 
-   printf("\n");
+   // printf("\n");*/
 }
 
 
@@ -499,13 +511,13 @@ void checkOpcode(unsigned int inst, unsigned int ex)
    if(opcode == 0x02<<26 || opcode == 0x03<<26)
    {
       // if (sim == 1 && ex == 1){
-      //    printf("--> J-Type instruction\n");
-      //    printf("Opcode value: 0x%02X \n", opcode >> 26);
-      //    printf("Opcode value:(decimal) %d \n", opcode >> 26);
-      //    printf("Instruction name: ");
-      //    printf("jump hexadecimal address: 0x%08X , and ", jumpTargetAddress);
+      //    // printf("--> J-Type instruction\n");
+      //    // printf("Opcode value: 0x%02X \n", opcode >> 26);
+      //    // printf("Opcode value:(decimal) %d \n", opcode >> 26);
+      //    // printf("Instruction name: ");
+      //    // printf("jump hexadecimal address: 0x%08X , and ", jumpTargetAddress);
       //    jumpTargetAddress = signExtensionForJumps(jumpTargetAddress) * 4;
-      //    printf("jump effective address: 0x%08X \n", jumpTargetAddress);
+      //    // printf("jump effective address: 0x%08X \n", jumpTargetAddress);
       // }
       jumpTargetAddress = signExtensionForJumps(jumpTargetAddress) * 4;
       
@@ -515,7 +527,7 @@ void checkOpcode(unsigned int inst, unsigned int ex)
       
       if(opcode == 0x02000000){
          if (sim == 1 && ex == 1){
-            printf("j\n");
+             printf("j\n");
             j(jumpTargetAddress);
          }else{
             ins[count] = inst;
@@ -523,7 +535,7 @@ void checkOpcode(unsigned int inst, unsigned int ex)
       }else{
          if (sim == 1 && ex == 1){
             jal(jumpTargetAddress);
-            printf("Instruction name: jal\n");
+             printf("Instruction name: jal\n");
          }else{
             ins[count] = inst;
          }
@@ -537,44 +549,44 @@ void checkOpcode(unsigned int inst, unsigned int ex)
    else if(opcode == 0x16<<26 && funcCode == 0x00000000 && sim == 1 && ex == 1)
    {
 
-      printf("--> R-Type instruction\n");
-      printf("Opcode value: 0x%02X \n", opcode >> 26);
-      printf("Opcode value(decimal): %d \n", opcode >> 26);
-      printf("Function code: 0x%08X \n", funcCode);
-      printf("Instruction name: mfc0");
-      printf("\n");
+      /*// printf("--> R-Type instruction\n");
+      // printf("Opcode value: 0x%02X \n", opcode >> 26);
+      // printf("Opcode value(decimal): %d \n", opcode >> 26);
+      // printf("Function code: 0x%08X \n", funcCode);
+      // printf("Instruction name: mfc0");
+      // printf("\n");
       //treat this as a register operation; print rs, rt, rd fields
-      printf("Rs reg: 0x%X\n", rsReg);
-      printf("Rs reg:(decimal) %d\n", rsReg);
-      printf("Rt reg: 0x%X\n", rtReg);
-      printf("Rt reg:(decimal) %d\n", rtReg);
-      printf("Rd reg: 0x%X\n", rdReg);
-      printf("Rd reg:(decimal) %d\n", rdReg);
-      printf("Shamt : 0x%X\n", shamt);
-      printf("Shamt:(decimal) %d\n", shamt);
+      // printf("Rs reg: 0x%X\n", rsReg);
+      // printf("Rs reg:(decimal) %d\n", rsReg);
+      // printf("Rt reg: 0x%X\n", rtReg);
+      // printf("Rt reg:(decimal) %d\n", rtReg);
+      // printf("Rd reg: 0x%X\n", rdReg);
+      // printf("Rd reg:(decimal) %d\n", rdReg);
+      // printf("Shamt : 0x%X\n", shamt);
+      // printf("Shamt:(decimal) %d\n", shamt);*/
    }
    
    // not going into else condition for certain times
    else
    {
       if(sim == 1 && ex == 1){
-         printf("--> I-Type instruction\n");
-         printf("Opcode value: 0x%02X \n", opcode >> 26);
-         printf("Opcode value:(decimal) %d \n", opcode >> 26);
-         printf("Instruction name: ");
+         /*// printf("--> I-Type instruction\n");
+         // printf("Opcode value: 0x%02X \n", opcode >> 26);
+         // printf("Opcode value:(decimal) %d \n", opcode >> 26);
+         // printf("Instruction name: ");*/
       }
       
       if(opcode == 0x04<<26){
          if(sim == 1 && ex == 1){
             beq(results.rs, results.rt, branchEffAddress);
-            printf("beq");
+             printf("beq");
          }else{
             ins[count] = inst;
          }
          
       }else if(opcode == 0x05<<26){
          if(sim == 1 && ex == 1){
-            printf("bne");
+             printf("bne");
             bne(results.rs, results.rt, branchEffAddress);
          }else{
             ins[count] = inst;
@@ -582,7 +594,7 @@ void checkOpcode(unsigned int inst, unsigned int ex)
          }
       }else if(opcode == 0x08<<26){
          if (sim == 1 && ex == 1){
-            printf("addi");
+             printf("addi");
             addi(results.rs, results.rt, signExtension2(immAddress));
          }else{
             ins[count] = inst;
@@ -590,21 +602,21 @@ void checkOpcode(unsigned int inst, unsigned int ex)
          
       }else if(opcode == 0x09<<26){
          if (sim == 1 && ex == 1){
-          printf("addiu");
+           printf("addiu");
           addi(results.rs, results.rt, immAddress);  
          }else{
             ins[count] = inst;
          }
       }else if(opcode == 0x0A <<26){
          if (sim == 1 && ex == 1){
-          printf("slti");
+           printf("slti");
           slti(results.rs, results.rt, immAddress);  
          }else{
             ins[count] = inst;
          }         
       }else if(opcode == 0x0C<<26){
          if (sim == 1 && ex == 1){
-            printf("andi");
+             printf("andi");
             andi(results.rs, results.rt, immAddress);    
          }else{
             ins[count] = inst;
@@ -613,7 +625,7 @@ void checkOpcode(unsigned int inst, unsigned int ex)
          
       }else if(opcode == 0x0D<<26){
          if (sim == 1 && ex == 1){
-            printf("ori");
+             printf("ori");
             ori(results.rs, results.rt, immAddress);
          }else{
             ins[count] = inst;
@@ -622,7 +634,7 @@ void checkOpcode(unsigned int inst, unsigned int ex)
          
       }else if(opcode == 0x0E<<26){
          if (sim == 1 && ex == 1){
-            printf("xori");
+             printf("xori");
             xori(results.rs, results.rt, immAddress);
          }else{
             ins[count]= inst;
@@ -631,7 +643,7 @@ void checkOpcode(unsigned int inst, unsigned int ex)
          
       }else if(opcode == 0x0F<<26){
          if (sim == 1 && ex == 1){
-            printf("lui");
+             printf("lui");
             lui(results.rs, results.rt, immAddress);
          }else{
             ins[count] = inst;
@@ -640,7 +652,7 @@ void checkOpcode(unsigned int inst, unsigned int ex)
          
       }else if(opcode == 0x20<<26){
          if (sim == 1 && ex == 1){
-           printf("lb");
+            printf("lb");
            lb(results.rs, results.rt, immAddress); 
          }else{
             ins[count] = 0x01;
@@ -651,7 +663,7 @@ void checkOpcode(unsigned int inst, unsigned int ex)
          
       }else if(opcode == 0x21<<26){
          if (sim == 1 && ex == 1){
-           printf("lh");
+            printf("lh");
             lh(results.rs, results.rt, immAddress); 
          }else{
             ins[count] = 0x01;
@@ -662,7 +674,7 @@ void checkOpcode(unsigned int inst, unsigned int ex)
          
       }else if(opcode == 0x24<<26){
          if (sim == 1 && ex == 1){
-            printf("lbu");
+             printf("lbu");
             lbu(results.rs, results.rt, immAddress);
          }else{
             ins[count] = 0x01;
@@ -673,7 +685,7 @@ void checkOpcode(unsigned int inst, unsigned int ex)
          
       }else if(opcode == 0x23<<26){
          if (sim == 1 && ex == 1){
-            printf("lw");
+             printf("lw");
             lw(results.rs, results.rt, immAddress);
          }else{
             ins[count] = 0x01;
@@ -684,7 +696,7 @@ void checkOpcode(unsigned int inst, unsigned int ex)
          
       }else if(opcode == 0x25<<26){
          if (sim == 1 && ex == 1){
-            printf("lhu");
+             printf("lhu");
             lhu(results.rs, results.rt, immAddress);
          }else{
             ins[count] = 0x01;
@@ -695,7 +707,7 @@ void checkOpcode(unsigned int inst, unsigned int ex)
          
       }else if(opcode == 0x28<<26){
          if (sim == 1 && ex == 1){
-            printf("sb");
+             printf("sb");
             sb(results.rs, results.rt, immAddress);
          }else{
             ins[count] = inst;
@@ -704,7 +716,7 @@ void checkOpcode(unsigned int inst, unsigned int ex)
          
       }else if(opcode == 0x29<<26){
          if (sim == 1 && ex == 1){
-            printf("sh");
+            // printf("sh");
             sh(results.rs, results.rt, immAddress);
          }else{
             ins[count] = inst;
@@ -713,7 +725,7 @@ void checkOpcode(unsigned int inst, unsigned int ex)
          
       }else if(opcode == 0x2B<<26){
          if (sim == 1 && ex == 1){
-            printf("sw");
+             printf("sw");
             sw(results.rs, results.rt, immAddress);
          }else{
             ins[count] = inst;
@@ -721,31 +733,31 @@ void checkOpcode(unsigned int inst, unsigned int ex)
          }
       }else{
          if(sim == 1 && ex == 1){
-            printf("\nlui\n");
+             printf("\nlui\n");
          }else{
             count--;
          }
       }
       
-      // printf("\n");
-      // printf("Rs reg: 0x%X\n", rsReg);
-      // printf("Rs reg:(decimal) %d\n", rsReg);
-      // printf("Rt reg: 0x%X\n", rtReg);
-      // printf("Rt reg:(decimal) %d\n", rtReg);
+      // // printf("\n");
+      // // printf("Rs reg: 0x%X\n", rsReg);
+      // // printf("Rs reg:(decimal) %d\n", rsReg);
+      // // printf("Rt reg: 0x%X\n", rtReg);
+      // // printf("Rt reg:(decimal) %d\n", rtReg);
       
       // if its a branch or not, depending on that, we do an effective address
       if(opcode == 0x04 << 26 || opcode == 0x05 << 26)
       {
-         printf("Branch's Effective Address: 0x%08X \n", branchEffAddress);
+         // printf("Branch's Effective Address: 0x%08X \n", branchEffAddress);
       }
       else
       {
-         printf("Immediate Value: 0x%08X \n", signExtension2(immAddress));
+         // printf("Immediate Value: 0x%08X \n", signExtension2(immAddress));
       }
       
 
    }
-   printf("\n");
+   // printf("\n");
 }
 
 // jump instruction - For sign extending 26 bit address to 32 bits
@@ -989,6 +1001,7 @@ void jal(int jAdress)
 {
    results.exresult = pc+4;
    pc = (jAdress&0x00000FFFF)/4;
+   printf("jAdress: 0x%08X\n", jAdress);
    results.wbindex = 31;
    
 }
@@ -1043,10 +1056,11 @@ void sw(unsigned int rs, unsigned int rt, int immed){
 }
 void syscall(){
    if(regs[2] == 0){
-      printf("\n%08X\n", regs[4]);
+      // printf("\n%08X\n", regs[4]);
    }else if(regs[2] == 5){
-      printf("\n%08X\n", regs[2]);
+      // printf("\n%08X\n", regs[2]);
    }else if(regs[2] == 10){
+	  results.wbindex -= 1;
       count = 0;
       haltflag = 1;
       printf("\nThe Program has Exited\n");
@@ -1057,10 +1071,10 @@ void syscall(){
 //helper functions
 
 void print_stats(){
-   for(int i = 0; i < 32; i++){
-      printf("Register %d: %08X \n", i, regs[i]);
-   }
-   printf("\nPC Count:%08X\n Number of Clock Cycles:%d\n Number of Instructions:%d\n", pc, clk,instr_cnt);
+   /*for(int i = 0; i < 32; i++){
+      // // printf("Register %d: %08X \n", i, regs[i]);
+   }*/
+   printf("\nPC Count:%08X\n Number of Clock Cycles:%d\n Number of Instructions:%d\n\n", pc, clk,pc/4);
 }
 
 
