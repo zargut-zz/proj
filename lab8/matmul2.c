@@ -38,6 +38,7 @@ unsigned int writes = 0;
 
 void mem_read(int *mp)
 {
+	printf("\n----------------------\n");
 	index_bits = log10(CACHELINES)/log10(2);
 	tag_bits = 64 - index_bits - OFFSET_BITS;
 	reads++;
@@ -181,7 +182,7 @@ void matmul( r1, c1, c2 ){
 
 #if CACHESIM		/* "Hooks" to measure memory references - enabled if CACHESIM  */
 
-        mp1 = &mult[i][j];
+    mp1 = &mult[i][j];
 	mp2 = &a[i][k];
 	mp3 = &b[k][j];   
 	mem_read(mp1);
@@ -194,9 +195,6 @@ void matmul( r1, c1, c2 ){
 
         }
    }
-
-
-
 
 
 int main()
@@ -257,5 +255,8 @@ int main()
         if(j==c2-1)
             printf("\n\n");
     }
+    float total = hits+miss;
+    float hit_perc = hits/total*100;
+    printf("\n\n HITS: %d \nMISSES: %d\nHIT RATE: %f\n\n", hits,miss,hit_perc);
     return 0;
 }
