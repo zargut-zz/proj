@@ -117,7 +117,8 @@ void mem_write(int *mp)
 		cache_1.data[index] = data;
 
 	}else if(ASSOCIATIVITY == 2){
-		if(cache_1.read_cnt[index] < cache_2.read_cnt[index]){
+		//writes to the cache line that has less reads
+		if(cache_1.read_cnt[index] > cache_2.read_cnt[index]){
 			cache_2.tag_array[index] = tag;
 			cache_2.valid[index] = 1;
 			cache_2.data[index] = data;
@@ -127,15 +128,16 @@ void mem_write(int *mp)
 			cache_1.data[index] = data;
 		}
 	}else{
-		if((cache_1.read_cnt[index] > cache_2.read_cnt[index]) && (cache_1.read_cnt[index] > cache_3.read_cnt[index]) && (cache_1.read_cnt[index] > cache_4.read_cnt[index])){
+		//writes to the cache line that has least reads
+		if((cache_1.read_cnt[index] < cache_2.read_cnt[index]) && (cache_1.read_cnt[index] < cache_3.read_cnt[index]) && (cache_1.read_cnt[index] < cache_4.read_cnt[index])){
 			cache_1.tag_array[index] = tag;
 			cache_1.valid[index] = 1;
 			cache_1.data[index] = data;
-		}else if((cache_2.read_cnt[index] > cache_1.read_cnt[index]) && (cache_2.read_cnt[index] > cache_3.read_cnt[index]) && (cache_2.read_cnt[index] > cache_1.read_cnt[index])){
+		}else if((cache_2.read_cnt[index] < cache_1.read_cnt[index]) && (cache_2.read_cnt[index] < cache_3.read_cnt[index]) && (cache_2.read_cnt[index] < cache_1.read_cnt[index])){
 			cache_2.tag_array[index] = tag;
 			cache_2.valid[index] = 1;
 			cache_2.data[index] = data;
-		}else if((cache_3.read_cnt[index] > cache_1.read_cnt[index]) && (cache_3.read_cnt[index] > cache_2.read_cnt[index]) && (cache_3.read_cnt[index] > cache_4.read_cnt[index])){
+		}else if((cache_3.read_cnt[index] < cache_1.read_cnt[index]) && (cache_3.read_cnt[index] < cache_2.read_cnt[index]) && (cache_3.read_cnt[index] < cache_4.read_cnt[index])){
 			cache_3.tag_array[index] = tag;
 			cache_3.valid[index] = 1;
 			cache_3.data[index] = data;
