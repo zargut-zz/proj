@@ -4,26 +4,75 @@
 #define AMAX 10			/* Maximum (square) array size */
 
 #define CACHESIM 1		/* Set to 1 if simulating Cache */
-#define CACHESIZE 16
+#define CACHELINES 16
 #define ASSOCIATIVITY 1
+#define OFFSET_BITS 6
 #include <stdio.h>
+#include <math.h>
 
 /*	memory management, code density, Cache emulation - statistics generation */
 /*	Generated for CSC 315 Lab 5 */
 
-
 /* This function gets called with each "read" reference to memory */
-def struct cache{
-	unsigned int valid[CACHESIZE];
-	unsigned int tag_array[CACHESIZE];
-	int data[CACHESIZE];
+struct cache{
+	unsigned int valid[CACHELINES/ASSOCIATIVITY];
+	unsigned int tag_array[CACHELINES/ASSOCIATIVITY];
+	int data[CACHELINES/ASSOCIATIVITY];
 }
+
+struct cache cache_1;
+struct cache cache_2;
+struct cache cache_3;
+struct cache cache_4;
+
+unsigned int index_bits = log10(CACHELINES)/log10(2);
+unsigned int tag_bits = 64 - index_bits - OFFSET_BITS;
+unsigned int hits = 0;
+unsigned int miss = 0;
+unsigned int reads = 0;
+unsigned int writes = 0;
 
 void mem_read(int *mp)
 {
-
+  reads++;
+  unsigned int offset, tag, index;
+  int data = &mp;
 	printf("Memory read from location %p\n", mp);  
-	unsigned int 
+  offset = mp & 0x000000000000003F;
+  index = mp << tag_bits;
+  index = index >> (tag_bits + OFFSET_BITS);
+  tag = mp >> (index_bits + OFFSET_BITS);
+
+	if (ASSOCIATIVITY == 1){
+    if (tag == cache_1.tag_array[index]) {
+      hits++;
+    }
+    else {
+      miss++;
+      mem_write(mp);
+    }
+  }
+  else if (ASSOCIATIVITY == 2) {
+    if (tag == cache_1.tag_array[index] || tag == cache_2.tag_array[index]) {
+      hits++;
+    }
+    else {
+      miss++;
+      mem_write(mp);
+    }
+  }
+  else {
+    if (tag == cache_1.tag_array[index] ||
+        tag == cache_2.tag_array[index] ||
+        tag == cache_3.tag_array[index] ||
+        tag == cache_4.tag_array[index]) {
+      hits++;
+    }
+    else {
+      miss++;
+      mem_write(mp);
+    }
+  }
 
 }
 
@@ -32,8 +81,17 @@ void mem_read(int *mp)
 
 void mem_write(int *mp)
 {
+  writes++;
+  printf("Memory write to location %p\n", mp); 
+  unsigned int offset, tag, index;
+  int data = &mp;
+  printf("Memory read from location %p\n", mp);  
+  offset = mp & 0x000000000000003F;
+  index = mp << tag_bits;
+  index = index >> (tag_bits + OFFSET_BITS);
+  tag = mp >> (index_bits + OFFSET_BITS);
 
-/* printf("Memory write to location %p\n", mp); */
+  
 
 }
 
@@ -131,7 +189,7 @@ int main()
          b[i][j] = 10 + i + j;
     }
 
-
+   init_cache();
    matmul(r1, c1, c2);  	/* Invoke matrix multiply function */	
 
 
