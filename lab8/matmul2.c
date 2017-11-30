@@ -38,7 +38,6 @@ unsigned int writes = 0;
 
 void mem_read(int *mp)
 {
-	printf("\n----------------------\n");
 	index_bits = log10(CACHELINES)/log10(2);
 	tag_bits = 64 - index_bits - OFFSET_BITS;
 	reads++;
@@ -60,6 +59,7 @@ void mem_read(int *mp)
 	      mem_write(mp);
 	    }
 	}else if (ASSOCIATIVITY == 2) {
+		index = index/2;
 		if (tag == cache_1.tag_array[index]) {
 		 	hits++;
 		    cache_1.read_cnt[index]+= 1; 
@@ -73,6 +73,7 @@ void mem_read(int *mp)
 		  mem_write(mp);
 	 	}
 	}else {
+		index = index/4;
 	    if (tag == cache_1.tag_array[index] ) {
 		     hits++;
 		     cache_1.read_cnt[index] += 1;
@@ -119,6 +120,7 @@ void mem_write(int *mp)
 
 	}else if(ASSOCIATIVITY == 2){
 		//writes to the cache line that has less reads
+		index = index/2;
 		if(cache_1.read_cnt[index] > cache_2.read_cnt[index]){
 			cache_2.tag_array[index] = tag;
 			cache_2.valid[index] = 1;
@@ -130,11 +132,12 @@ void mem_write(int *mp)
 		}
 	}else{
 		//writes to the cache line that has least reads
+		index = index/4;
 		if((cache_1.read_cnt[index] < cache_2.read_cnt[index]) && (cache_1.read_cnt[index] < cache_3.read_cnt[index]) && (cache_1.read_cnt[index] < cache_4.read_cnt[index])){
 			cache_1.tag_array[index] = tag;
 			cache_1.valid[index] = 1;
 			cache_1.data[index] = data;
-		}else if((cache_2.read_cnt[index] < cache_1.read_cnt[index]) && (cache_2.read_cnt[index] < cache_3.read_cnt[index]) && (cache_2.read_cnt[index] < cache_1.read_cnt[index])){
+		}else if((cache_2.read_cnt[index] < cache_1.read_cnt[index]) && (cache_2.read_cnt[index] < cache_3.read_cnt[index]) && (cache_2.read_cnt[index] < cache_4.read_cnt[index])){
 			cache_2.tag_array[index] = tag;
 			cache_2.valid[index] = 1;
 			cache_2.data[index] = data;
