@@ -3,32 +3,151 @@
 
 #define AMAX 10			/* Maximum (square) array size */
 
-#define CACHESIM 0		/* Set to 1 if simulating Cache */
-
+#define CACHESIM 1		/* Set to 1 if simulating Cache */
+#define CACHELINES 16
+#define ASSOCIATIVITY 1
+#define OFFSET_BITS 6
 #include <stdio.h>
+#include <math.h>
 
 /*	memory management, code density, Cache emulation - statistics generation */
 /*	Generated for CSC 315 Lab 5 */
 
-
 /* This function gets called with each "read" reference to memory */
+typedef struct cache{
+	unsigned int valid[CACHELINES/ASSOCIATIVITY];
+	unsigned int tag_array[CACHELINES/ASSOCIATIVITY];
+	unsigned int read_cnt[CACHELINES/ASSOCIATIVITY];
+	int data[CACHELINES/ASSOCIATIVITY];
 
-mem_read(int *mp)
-	{
+}cache, *cache_ptr;
+void mem_read(int *mp);
+void mem_write(int *mp);
 
-	/* printf("Memory read from location %p\n", mp);  */
+struct cache cache_1;
+struct cache cache_2;
+struct cache cache_3;
+struct cache cache_4;
 
+unsigned int index_bits;
+unsigned int tag_bits;
+unsigned int hits = 0;
+unsigned int miss = 0;
+unsigned int reads = 0;
+unsigned int writes = 0;
+
+void mem_read(int *mp)
+{
+	index_bits = log10(CACHELINES)/log10(2);
+	tag_bits = 64 - index_bits - OFFSET_BITS;
+	reads++;
+	unsigned int offset, tag, index;
+	int data = *mp;
+	printf("Memory read from location %p\n", mp);  
+	offset = (unsigned int)mp & 0x000000000000003F;
+	index = (unsigned int)mp << tag_bits;
+	index = index >> (tag_bits + OFFSET_BITS);
+	tag = (unsigned int)mp >> (index_bits + OFFSET_BITS);
+
+	if (ASSOCIATIVITY == 1){
+	    if (tag == cache_1.tag_array[index]) {
+	      hits++;
+	      cache_1.read_cnt[index]+= 1; 
+	    }
+	    else {
+	      miss++;
+	      mem_write(mp);
+	    }
+	}else if (ASSOCIATIVITY == 2) {
+		if (tag == cache_1.tag_array[index]) {
+		 	hits++;
+		    cache_1.read_cnt[index]+= 1; 
+
+		}else if(tag == cache_2.tag_array[index]){
+		 	hits++;
+		    cache_2.read_cnt[index]+= 1; 
+
+		}else{
+		  miss++;
+		  mem_write(mp);
+	 	}
+	}else {
+	    if (tag == cache_1.tag_array[index] ) {
+		     hits++;
+		     cache_1.read_cnt[index] += 1;
+	  	}else if(tag == cache_2.tag_array[index]){
+	      	hits++;
+	      	cache_2.read_cnt[index] += 1;
+
+	  	}else if(tag == cache_3.tag_array[index]){
+	      	hits++;
+	     	cache_3.read_cnt[index] += 1;
+
+	  	}else if(tag == cache_4.tag_array[index]){
+	      	hits++;
+	      	cache_4.read_cnt[index] += 1;
+
+	  	}else{
+	      miss++;
+	      mem_write(mp);
+	    }
 	}
+
+}
 
 
 /* This function gets called with each "write" reference to memory */
 
-mem_write(int *mp)
-	{
+void mem_write(int *mp)
+{
+	index_bits = log10(CACHELINES)/log10(2);
+	tag_bits = 64 - index_bits - OFFSET_BITS;
+	writes++;
+	printf("Memory write to location %p\n", mp); 
+	unsigned int offset, tag, index;
+	int data = *mp;
+	printf("Memory read from location %p\n", mp);  
+	offset = (unsigned int) mp & 0x000000000000003F;
+	index = (unsigned int)mp << tag_bits;
+	index = index >> (tag_bits + OFFSET_BITS);
+	tag = (unsigned int)mp >> (index_bits + OFFSET_BITS);
+	if(ASSOCIATIVITY == 1){
+		cache_1.tag_array[index] = tag;
+		cache_1.valid[index] = 1;
+		cache_1.data[index] = data;
 
-	/* printf("Memory write to location %p\n", mp); */
-
+	}else if(ASSOCIATIVITY == 2){
+		if(cache_1.read_cnt[index] < cache_2.read_cnt[index]){
+			cache_2.tag_array[index] = tag;
+			cache_2.valid[index] = 1;
+			cache_2.data[index] = data;
+		}else{
+			cache_1.tag_array[index] = tag;
+			cache_1.valid[index] = 1;
+			cache_1.data[index] = data;
+		}
+	}else{
+		if((cache_1.read_cnt[index] > cache_2.read_cnt[index]) && (cache_1.read_cnt[index] > cache_3.read_cnt[index]) && (cache_1.read_cnt[index] > cache_4.read_cnt[index])){
+			cache_1.tag_array[index] = tag;
+			cache_1.valid[index] = 1;
+			cache_1.data[index] = data;
+		}else if((cache_2.read_cnt[index] > cache_1.read_cnt[index]) && (cache_2.read_cnt[index] > cache_3.read_cnt[index]) && (cache_2.read_cnt[index] > cache_1.read_cnt[index])){
+			cache_2.tag_array[index] = tag;
+			cache_2.valid[index] = 1;
+			cache_2.data[index] = data;
+		}else if((cache_3.read_cnt[index] > cache_1.read_cnt[index]) && (cache_3.read_cnt[index] > cache_2.read_cnt[index]) && (cache_3.read_cnt[index] > cache_4.read_cnt[index])){
+			cache_3.tag_array[index] = tag;
+			cache_3.valid[index] = 1;
+			cache_3.data[index] = data;
+		}else{
+			cache_4.tag_array[index] = tag;
+			cache_4.valid[index] = 1;
+			cache_4.data[index] = data;
+		}
 	}
+  
+
+}
 
 
 /* Statically define the arrays a, b, and mult, where mult will become the cross product of a and b, i.e., a x b. */
@@ -39,8 +158,7 @@ static int a[AMAX][AMAX], b[AMAX][AMAX], mult[AMAX][AMAX];
 
 
 
-void matmul( r1, c1, c2 )
-   {
+void matmul( r1, c1, c2 ){
    int i,j,k;
    int *mp1, *mp2, *mp3;
 
@@ -48,10 +166,9 @@ void matmul( r1, c1, c2 )
 
 /* Initializing elements of matrix mult to 0.*/
     for(i=0; i<r1; ++i)
-     for(j=0; j<c2; ++j)
-       {
+     for(j=0; j<c2; ++j){
        mult[i][j]=0;
-       }
+      }
 
 /* Multiplying matrix a and b and storing in array mult. */
 
@@ -86,7 +203,7 @@ int main()
 
     int *mp1, *mp2, *mp3;
 
-    printf("Size of pointer is: %d\n\n", sizeof(mp1));
+    printf("Size of pointer is: %lu\n\n", sizeof(mp1));
 
     printf("Enter rows and column for first matrix: ");
     scanf("%d%d", &r1, &c1);
@@ -125,7 +242,6 @@ int main()
 
          b[i][j] = 10 + i + j;
     }
-
 
    matmul(r1, c1, c2);  	/* Invoke matrix multiply function */	
 
