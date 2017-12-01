@@ -5,7 +5,7 @@
 
 #define CACHESIM 1		/* Set to 1 if simulating Cache */
 #define CACHELINES 16
-#define ASSOCIATIVITY 4
+#define ASSOCIATIVITY 1
 #define OFFSET_BITS 6
 #include <stdio.h>
 #include <math.h>
@@ -48,7 +48,7 @@ void mem_read(int *mp)
 	offset = (unsigned int)mp & 0x000000000000003F;
 	index = (unsigned int)mp << tag_bits;
 	index = index >> (tag_bits + OFFSET_BITS);
-	printf("\nindex: %d\n",index);
+//	printf("\nindex: %d\n",index);
 	tag = (unsigned int)mp >> (index_bits + OFFSET_BITS);
 
 	index = index/ASSOCIATIVITY;
@@ -134,16 +134,19 @@ void mem_write(int *mp)
 		}
 	}else{
 		//writes to the cache line that has least reads
-		if((cache_1.read_cnt[index] < cache_2.read_cnt[index]) && (cache_1.read_cnt[index] < cache_3.read_cnt[index]) && (cache_1.read_cnt[index] < cache_4.read_cnt[index])){
+		if(((cache_1.read_cnt[index] < cache_2.read_cnt[index]) && (cache_1.read_cnt[index] < cache_3.read_cnt[index]) && (cache_1.read_cnt[index] < cache_4.read_cnt[index])) ||
+                   ((cache_1.read_cnt[index] < cache_2.read_cnt[index]) || (cache_1.read_cnt[index] < cache_3.read_cnt[index]) || (cache_1.read_cnt[index] < cache_4.read_cnt[index]))){
 			cache_1.tag_array[index] = tag;
 			cache_1.valid[index] = 1;
 			cache_1.data[index] = data;
-		}else if((cache_2.read_cnt[index] < cache_1.read_cnt[index]) && (cache_2.read_cnt[index] < cache_3.read_cnt[index]) && (cache_2.read_cnt[index] < cache_4.read_cnt[index])){
+		}else if(((cache_2.read_cnt[index] < cache_1.read_cnt[index]) && (cache_2.read_cnt[index] < cache_3.read_cnt[index]) && (cache_2.read_cnt[index] < cache_4.read_cnt[index])) ||
+                        ((cache_2.read_cnt[index] < cache_1.read_cnt[index]) && (cache_2.read_cnt[index] < cache_3.read_cnt[index]) && (cache_2.read_cnt[index] < cache_4.read_cnt[index]))){
 			cache_2.tag_array[index] = tag;
 			cache_2.valid[index] = 1;
 			cache_2.data[index] = data;
-		}else if((cache_3.read_cnt[index] < cache_1.read_cnt[index]) && (cache_3.read_cnt[index] < cache_2.read_cnt[index]) && (cache_3.read_cnt[index] < cache_4.read_cnt[index])){
-			cache_3.tag_array[index] = tag;
+		}else if(((cache_3.read_cnt[index] < cache_1.read_cnt[index]) && (cache_3.read_cnt[index] < cache_2.read_cnt[index]) && (cache_3.read_cnt[index] < cache_4.read_cnt[index])) ||
+			((cache_3.read_cnt[index] < cache_1.read_cnt[index]) && (cache_3.read_cnt[index] < cache_2.read_cnt[index]) && (cache_3.read_cnt[index] < cache_4.read_cnt[index]))){
+                        cache_3.tag_array[index] = tag;
 			cache_3.valid[index] = 1;
 			cache_3.data[index] = data;
 		}else{
@@ -262,5 +265,7 @@ int main()
     float total = hits+miss;
     float hit_perc = hits/total*100;
     printf("\n\n HITS: %d \nMISSES: %d\nHIT RATE: %f\n\n", hits,miss,hit_perc);
+    float ratio = (float)reads/writes*100;
+    printf("READS: %d \nWRITES: %d\nRATIO: %f\n\n", reads,writes,ratio);
     return 0;
 }
